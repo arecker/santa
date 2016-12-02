@@ -1,0 +1,34 @@
+email:
+  sever: mail.server.com
+  user: santa@reckerfamily.com
+  pass: s3crets4nta
+
+deadline: 12/25/2016
+price_limit: $25
+
+participants:
+  adam:
+    name: Adam
+    email: adam@genesis.com
+    address: 123 Tree of Life, Garden of Eden
+    exclude: [ eve ]  # each participant can have their own
+                      # "blacklist" of people that they shouldn't pair
+                      # with.  Just make sure it matches their "slug"
+  eve:
+    name: Eve
+    email: eve@genesis.com
+    address: 123 Tree of Life, Garden of Eden
+    exclude: [ adam ]
+  gabriel:
+    name: Gabriel
+    email: gabe@heaven.org
+    address: 123 Pearly Gates, Heaven
+  cain:
+    name: Cain
+    email: cain@genesis.com
+    address: 456 Exile St, Wilderness
+    exclude: [ abel]
+  abel:
+    name: Abel
+    email: abel@genesis.com
+    address: 456 Pasture Lain, Garden of Eden
