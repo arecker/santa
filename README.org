@@ -1,5 +1,0 @@
-#+TITLE: Santa Bot
-
-1. Fill out [[file:config.yml][the config]]
-2. Install the requirements with =pip install -r requirements.txt=
-3. Run =python santa.py= and tell everyone to check their email!
