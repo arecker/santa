@@ -1,0 +1,60 @@
+#!/bin/sh
+#|-*- mode:lisp -*-|#
+#| <Put a one-line description here>
+exec ros -Q -- $0 "$@"
+|#
+(progn ;;init forms
+  (ros:ensure-asdf)
+  #+quicklisp (ql:quickload '(cl-json) :silent t)
+  )
+
+(defpackage :ros.script.santabot.3692763083
+  (:use :cl))
+(in-package :ros.script.santabot.3692763083)
+
+(defun shuffle-list (sequence random-state)
+  (loop for i from (length sequence) downto 2
+	do (rotatef (elt sequence (random i random-state))
+		    (elt sequence (1- i))))
+  sequence)
+
+(defun shift-list (list)
+  (append (cdr list) (list (car list))))
+
+(defun zip-lists (a b)
+  (mapcar #'list a b))
+
+(defun forbidden-match-p (pair exclusions)
+  (let* ((gifter (car pair))
+	 (giftee (car (last pair))))
+    (member giftee (car (cdr (assoc gifter exclusions))))))
+
+(defun match (participants)
+  (let ((shifted-participants (shift-list participants)))
+    (zip-lists participants shifted-participants)))
+
+(defun print-match (pair)
+  (format t "~A -> ~A~%" (car pair) (car (last pair))))
+
+(defun get-config (path)
+  (with-open-file (s path :direction :INPUT)
+    (let ((json:*json-symbols-package* nil))
+      (json:decode-json s))))
+
+(defun main (path &rest argv)
+  (declare (ignorable argv))
+  (let* ((keep-shaking t)
+	 (config (get-config path))
+	 (participants (cdr (assoc 'participants config)))
+	 (exclusions (cdr (assoc 'exclusions config)))
+	 (matched-participants '()))
+    (loop while keep-shaking do
+	 (let* ((random-state (make-random-state t))
+		(shuffled-participants (shuffle-list participants random-state)))
+	   (setf matched-participants (remove-if (lambda (p) (forbidden-match-p p exclusions))
+						 (match shuffled-participants)))
+	   (setf keep-shaking (not (equal (list-length shuffled-participants)
+					  (list-length matched-participants))))))
+    (mapcar #'print-match matched-participants)))
+
+;;; vim: set ft=lisp lisp:

@@ -1,0 +1,48 @@
+{
+  "exclusions": {
+    "adam": [
+      "jordan"
+    ],
+    "alex": [
+      "marissa"
+    ],
+    "ben": [
+      "beth"
+    ],
+    "beth": [
+      "ben"
+    ],
+    "eric": [
+      "lauren"
+    ],
+    "joel": [
+      "tanya"
+    ],
+    "jordan": [
+      "adam"
+    ],
+    "lauren": [
+      "eric"
+    ],
+    "marissa": [
+      "alex"
+    ],
+    "tanya": [
+      "joel"
+    ]
+  },
+  "participants": [
+    "adam",
+    "alex",
+    "ben",
+    "beth",
+    "caleb",
+    "chi",
+    "eric",
+    "joel",
+    "jordan",
+    "lauren",
+    "marissa",
+    "tanya"
+  ]
+}
