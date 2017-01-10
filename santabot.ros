@@ -1,6 +1,6 @@
 #!/bin/sh
 #|-*- mode:lisp -*-|#
-#| <Put a one-line description here>
+#| Pair people for a secret santa gift exchange
 exec ros -Q -- $0 "$@"
 |#
 (progn ;;init forms

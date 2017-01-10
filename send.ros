@@ -1,0 +1,21 @@
+#!/bin/sh
+#|-*- mode:lisp -*-|#
+#| Working example of sending an email
+exec ros -Q -- $0 "$@"
+|#
+(progn ;;init forms
+  (ros:ensure-asdf)
+  #+quicklisp (ql:quickload '(cl-smtp cl+ssl) :silent t)
+  )
+
+(defpackage :ros.script.send.3693057858
+  (:use :cl))
+(in-package :ros.script.send.3693057858)
+
+(defun main (&rest argv)
+  (declare (ignorable argv))
+  (cl-smtp:send-email "smtp.gmail.com"
+		      "FROM@gmail.com" "TO@gmail.com"
+		      "Test Subject" "Test Message"
+		      :authentication '("FROM@gmail.com" "imap-password-blah") :ssl :tls))
+;;; vim: set ft=lisp lisp:
