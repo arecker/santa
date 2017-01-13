@@ -1,22 +1,16 @@
 #!/bin/sh
 #|-*- mode:lisp -*-|#
-#| Pair people for a secret santa gift exchange
+#| Santabot - the secret santa match-maker
 exec ros -Q -- $0 "$@"
 |#
-(progn ;;init forms
+(progn
   (ros:ensure-asdf)
-  #+quicklisp (ql:quickload '(cl-json) :silent t)
+  #+quicklisp (ql:quickload '(cl-json prove) :silent t)
   )
 
-(defpackage :ros.script.santabot.3692763083
+(defpackage :santabot
   (:use :cl))
-(in-package :ros.script.santabot.3692763083)
-
-(defun shuffle-list (sequence random-state)
-  (loop for i from (length sequence) downto 2
-	do (rotatef (elt sequence (random i random-state))
-		    (elt sequence (1- i))))
-  sequence)
+(in-package :santabot)
 
 (defun shift-list (list)
   (append (cdr list) (list (car list))))
@@ -24,37 +18,108 @@ exec ros -Q -- $0 "$@"
 (defun zip-lists (a b)
   (mapcar #'list a b))
 
-(defun forbidden-match-p (pair exclusions)
+(defun permute-list (lst)
+  (if lst
+      (mapcan (lambda (x) (mapcar (lambda (y) (cons x y))
+				  (permute-list (remove x lst))))
+	      lst)
+      '(())))
+
+(defun participants (config)
+  (cdr (assoc 'participants config)))
+
+(defun names (participants)
+  (mapcar #'car participants))
+
+(defun exclusions (name participants)
+  (mapcar
+   (lambda (e) (intern (string-upcase e)))
+   (cdr (assoc 'exclusions (cdr (assoc name participants))))))
+
+(defun forbidden-pair-p (pair participants)
   (let* ((gifter (car pair))
-	 (giftee (car (last pair))))
-    (member giftee (car (cdr (assoc gifter exclusions))))))
+	 (exclusions (exclusions gifter participants))
+	 (giftee (car (cdr pair))))
+    (member giftee exclusions)))
 
-(defun match (participants)
-  (let ((shifted-participants (shift-list participants)))
-    (zip-lists participants shifted-participants)))
+(defun forbidden-match-p (match participants)
+  (not (equal (length match)
+	      (length (remove-if (lambda (p) (forbidden-pair-p p participants))
+				 match)))))
 
-(defun print-match (pair)
-  (format t "~A -> ~A~%" (car pair) (car (last pair))))
+(defun remove-duplicate-matches (matches)
+  (remove-duplicates matches
+		    :test (lambda (a b) (equal (sort a #'<)
+					       (sort b #'<)))))
 
-(defun get-config (path)
+(defun read-config (path)
   (with-open-file (s path :direction :INPUT)
     (let ((json:*json-symbols-package* nil))
       (json:decode-json s))))
 
-(defun main (path &rest argv)
-  (declare (ignorable argv))
-  (let* ((keep-shaking t)
-	 (config (get-config path))
-	 (participants (cdr (assoc 'participants config)))
-	 (exclusions (cdr (assoc 'exclusions config)))
-	 (matched-participants '()))
-    (loop while keep-shaking do
-	 (let* ((random-state (make-random-state t))
-		(shuffled-participants (shuffle-list participants random-state)))
-	   (setf matched-participants (remove-if (lambda (p) (forbidden-match-p p exclusions))
-						 (match shuffled-participants)))
-	   (setf keep-shaking (not (equal (list-length shuffled-participants)
-					  (list-length matched-participants))))))
-    (mapcar #'print-match matched-participants)))
+(defun get-possible-matches (participants)
+  (remove-duplicate-matches
+   (remove-if
+    (lambda (m) (forbidden-match-p m participants))
+    (mapcar
+     (lambda (lst) (zip-lists lst (shift-list lst)))
+     (permute-list (names participants))))))
 
+(defun test ()
+  (let* ((config '((PRICE . "$50") (DEADLINE . "12/25/2017")
+		   (PARTICIPANTS
+		    (ADAM (NAME . "Adam") (EMAIL . "adam@gardenofeden.org")
+		     (ADDRESS . "123 Tree of Life") (EXCLUSIONS "eve"))
+		    (EVE (NAME . "Eve") (EMAIL . "eve@gardenofeden.org") (ADDRESS . "123 Tree of Life")
+		     (EXCLUSIONS "adam"))
+		    (CAIN (NAME . "Cain") (EMAIL . "cain@gardenofeden.org")
+		     (ADDRESS . "456 Banished Lands") (EXCLUSIONS "abel"))
+		    (ABEL (NAME . "Abel") (EMAIL . "abel@gardenofeden.org")
+		     (ADDRESS . "789 Green Pastures") (EXCLUSIONS "cain")))))
+	 (ptcpnts (participants config)))
+
+    (prove:plan 10)
+
+    (prove:is (shift-list '(1 2 3)) '(2 3 1))
+
+    (prove:is (zip-lists '(1 2 3) '(a b c))
+	      '((1 a) (2 b) (3 c)))
+
+    (prove:is (permute-list '(a b c))
+	      '((a b c) (a c b) (b a c) (b c a) (c a b) (c b a)))
+
+    (prove:is (names ptcpnts) '(adam eve cain abel))
+
+    (prove:is (exclusions 'eve ptcpnts) '(adam))
+
+    (prove:ok (forbidden-pair-p '(adam eve) ptcpnts))
+
+    (prove:ok (not (forbidden-pair-p '(adam cain) ptcpnts)))
+
+    (prove:ok (forbidden-match-p
+	       '((adam eve)
+		 (eve abel)
+		 (cain adam)
+		 (abel cain))
+	       ptcpnts))
+
+    (prove:ok (not (forbidden-match-p
+		    '((adam cain)
+		      (eve abel)
+		      (cain adam)
+		      (abel eve))
+		    ptcpnts)))
+
+    (prove:is (remove-duplicate-matches '(((a a) (b b) (c c))
+					  ((a a) (b b) (c c))
+					  ((a 1) (c 3) (b 2))
+					  ((a 1) (b 2) (c 3))
+					  ((a z) (b y) (c x))))
+	      '(((a z) (b y) (c x))))
+
+    (prove:finalize)))
+
+(defun main (&rest argv)
+  (declare (ignorable argv))
+  (test))
 ;;; vim: set ft=lisp lisp:
