@@ -5,6 +5,9 @@
     (let ((json:*json-symbols-package* nil))
       (json:decode-json s))))
 
+(defun assoc-val (item alist)
+  (cdr (assoc item alist)))
+
 (defun shift (l)
   (append (last l)
 	  (reverse (cdr (reverse l)))))
@@ -19,13 +22,13 @@
 			  (permute (remove x l :count 1)))) l)))
 
 (defun participants (config)
-  (mapcar #'car (cdr (assoc 'participants config))))
+  (mapcar #'car (assoc-val 'participants config)))
 
 (defun exclusions (name config)
   (mapcar (lambda (n) (intern (string-upcase n)))
-	  (cdr (assoc 'exclusions
-		      (cdr (assoc name
-				  (cdr (assoc 'participants config))))))))
+	  (assoc-val 'exclusions
+		     (assoc-val name
+				(assoc-val 'participants config)))))
 
 (defun allowed-match-p (match config)
   (let ((gifter (first match))
@@ -45,7 +48,18 @@
 (defun pluck (l)
   (if l (nth (random (length l)) l) nil))
 
+(defun fullname (name config)
+  (assoc-val 'name (assoc-val name (assoc-val 'participants config))))
+
+(defun address (name config)
+  (assoc-val 'address (assoc-val name (assoc-val 'participants config))))
+
+(defun email (name config)
+  (assoc-val 'email (assoc-val name (assoc-val 'participants config))))
+
 (defun main ()
   (setf *config* (read-config "~/git/santabot/example-config.json"))
   (setf *possibilities* (possibilities *config*))
-  (setf *matches* (pluck *possibilities*)))
+  (setf *matches* (pluck *possibilities*))
+  (unless *matches*
+    (error "No possible matches")))
