@@ -1,3 +1,5 @@
+(ql:quickload "cl-json")
+
 (defun read-config (path)
   (with-open-file (s path :direction :INPUT)
     (let ((json:*json-symbols-package* nil))
@@ -34,8 +36,16 @@
   (every (lambda (m) (allowed-match-p m config)) matches))
 
 (defun possibilities (config)
-  (remove-if-not (lambda (p) (allowed-possibility-p p config))
-		 (mapcar #'match (permute (participants config)))))
+  (remove-duplicates
+   (mapcar (lambda (p) (sort p #'string<= :key #'first))
+	   (remove-if-not (lambda (p) (allowed-possibility-p p config))
+			  (mapcar #'match (permute (participants config)))))
+   :test #'equal))
 
 (defun pluck (l)
   (if l (nth (random (length l)) l) nil))
+
+(defun main ()
+  (setf *config* (read-config "~/git/santabot/example-config.json"))
+  (setf *possibilities* (possibilities *config*))
+  (setf *matches* (pluck *possibilities*)))
