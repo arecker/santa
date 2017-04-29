@@ -1,11 +1,7 @@
-(setf *participants* '(adam eve cain abel))
-
 (defun read-config (path)
   (with-open-file (s path :direction :INPUT)
     (let ((json:*json-symbols-package* nil))
       (json:decode-json s))))
-
-(setf *config* (read-config "~/git/santabot/example-config.json"))
 
 (defun shift (l)
   (append (last l)
@@ -40,3 +36,6 @@
 (defun possibilities (config)
   (remove-if-not (lambda (p) (allowed-possibility-p p config))
 		 (mapcar #'match (permute (participants config)))))
+
+(defun main ()
+  (possibilities (read-config "~/git/santabot/example-config.json")))
