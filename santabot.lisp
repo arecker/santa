@@ -37,5 +37,5 @@
   (remove-if-not (lambda (p) (allowed-possibility-p p config))
 		 (mapcar #'match (permute (participants config)))))
 
-(defun main ()
-  (possibilities (read-config "~/git/santabot/example-config.json")))
+(defun pluck (l)
+  (if l (nth (random (length l)) l) nil))
