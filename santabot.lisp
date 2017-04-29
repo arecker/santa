@@ -57,9 +57,16 @@
 (defun email (name config)
   (assoc-val 'email (assoc-val name (assoc-val 'participants config))))
 
-(defun main ()
-  (setf *config* (read-config "~/git/santabot/example-config.json"))
-  (setf *possibilities* (possibilities *config*))
-  (setf *matches* (pluck *possibilities*))
-  (unless *matches*
-    (error "No possible matches")))
+(defun price (config)
+  (assoc-val 'price config))
+
+(defun deadline (config)
+  (assoc-val 'deadline config))
+
+;; (defun email-body (gifter recipient config)
+;;   (format nil "Greetings %s!" (fullname gifter config)))
+
+(defun main (configpath)
+  (pluck (possibilities (read-config configpath))))
+
+(pprint (main "~/git/santabot/example-config.json"))
