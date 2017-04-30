@@ -1,6 +1,11 @@
 {
   "price": "$50",
   "deadline": "12/25/2017",
+  "mail": {
+    "server": "smtp.gmail.com",
+    "user": "you@gmail.com",
+    "password": "SECRETPASS"
+  },
   "participants": {
     "adam": {
       "name": "Adam",

@@ -1,4 +1,5 @@
 (ql:quickload "cl-json")
+(ql:quickload "cl-smtp")
 
 (defun read-config (path)
   (with-open-file (s path :direction :INPUT)
@@ -83,11 +84,29 @@ https://github.com/arecker/santabot
 	    (address giftee config)
 	    (deadline config))))
 
+(defun mail-server (config)
+  (assoc-val 'server (assoc-val 'mail config)))
+
+(defun mail-user (config)
+  (assoc-val 'user (assoc-val 'mail config)))
+
+(defun mail-password (config)
+  (assoc-val 'password (assoc-val 'mail config)))
+
+(defun send (match config)
+  (cl-smtp:send-email (mail-server config)
+		      (mail-user config)
+		      (email (first match) config)
+		      "Your Secret Santa Match!"
+		      (email-body match config)
+		      :authentication `(,(mail-user config) ,(mail-password config)) :ssl :tls))
+
 (defun main (configpath)
   (setf *config* (read-config configpath))
   (setf *possibilities* (possibilities *config*))
   (setf *matches* (pluck *possibilities*))
-  (mapcar (lambda (m) (email-body m *config*))
-	  *matches*))
+  (unless *matches*
+    (error "No possible matches"))
+  (mapcar (lambda (m) (send m *config*)) *matches*))
 
 (pprint (main "~/git/santabot/example-config.json"))
