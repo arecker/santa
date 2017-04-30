@@ -1,0 +1,25 @@
+#+TITLE: Santabot
+
+Automate your secret santa game with the power of lisp!
+
+* Configuring
+
+Each participant can have their own list of /exclusions/ - that is,
+people they will not be assigned to give a gift to.  This works well
+for couples and maybe even people who were paired last year.  Keep in
+mind that if you provide too many constraints for the number of
+participants, you may leave the program without any possible matches.
+
+In the provided example, four participants who are each excluded from
+participating from one other person (Adam and Eve, Cain and Abel),
+there are only two possible outcomes.
+
+* Running
+
+1. Make sure [[https://www.quicklisp.org/beta/][quicklisp]] is installed.
+
+2. Edit =config.json= to suit your needs.
+
+3. Run =sbcl --load santabot.lisp=.
+
+4. Tell everybody to check their email!
