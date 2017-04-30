@@ -109,4 +109,4 @@ https://github.com/arecker/santabot
     (error "No possible matches"))
   (mapcar (lambda (m) (send m *config*)) *matches*))
 
-(pprint (main "~/git/santabot/example-config.json"))
+(main "~/git/santabot/example-config.json")
