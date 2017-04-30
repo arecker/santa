@@ -67,11 +67,15 @@
   (let ((gifter (first match))
 	(giftee (second match)))
     (format nil
-	    "Greetings ~S!~%~%
-Your secret santa match is ~S.
-Please mail your ~S gift to ~S by ~S.~%~%
-Happy Holidays!~%~%
+	    "Greetings ~A!
+
+Your secret santa match is ~A.
+Please mail your ~A gift to ~A by ~A.
+
+Happy Holidays!
+
 Santabot
+https://github.com/arecker/santabot
 "
 	    (fullname gifter config)
 	    (fullname giftee config)
