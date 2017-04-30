@@ -63,10 +63,27 @@
 (defun deadline (config)
   (assoc-val 'deadline config))
 
-;; (defun email-body (gifter recipient config)
-;;   (format nil "Greetings %s!" (fullname gifter config)))
+(defun email-body (match config)
+  (let ((gifter (first match))
+	(giftee (second match)))
+    (format nil
+	    "Greetings ~S!~%~%
+Your secret santa match is ~S.
+Please mail your ~S gift to ~S by ~S.~%~%
+Happy Holidays!~%~%
+Santabot
+"
+	    (fullname gifter config)
+	    (fullname giftee config)
+	    (price config)
+	    (address giftee config)
+	    (deadline config))))
 
 (defun main (configpath)
-  (pluck (possibilities (read-config configpath))))
+  (setf *config* (read-config configpath))
+  (setf *possibilities* (possibilities *config*))
+  (setf *matches* (pluck *possibilities*))
+  (mapcar (lambda (m) (email-body m *config*))
+	  *matches*))
 
 (pprint (main "~/git/santabot/example-config.json"))
