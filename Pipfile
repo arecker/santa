@@ -14,6 +14,11 @@ django = "*"
 
 ipdb = "*"
 ipython = "*"
+jedi = "*"
+"autopep8" = "*"
+yapf = "*"
+"flake8" = "*"
+virtualenvwrapper = "*"
 
 
 [requires]
