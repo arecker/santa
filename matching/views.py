@@ -12,7 +12,7 @@ class ParticipantUpdate(UpdateView):
     fields = [
         'address_1', 'address_2',
         'city', 'state', 'province', 'country',
-        'zip_code', 'notes', 'default_exclusions'
+        'zip_code', 'notes',
     ]
     success_url = reverse_lazy('home')
 
